@@ -96,3 +96,30 @@ export const getCurrentUser = async () => {
     throw new Error(err);
   }
 };
+
+// Get all posts
+export const getAllPosts = async () => {
+  try {
+    const post = await databases.listDocuments(
+      config.databaseId,
+      config.videosCollectionId
+    );
+    return post.documents;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+// Get Latest Posts
+export const getLatestPosts = async () => {
+  try {
+    const post = await databases.listDocuments(
+      config.databaseId,
+      config.videosCollectionId,
+      [Query.orderDesc("$createdAt"), Query.limit(7)]
+    );
+    return post.documents;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};

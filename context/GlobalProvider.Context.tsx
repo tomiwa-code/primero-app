@@ -1,12 +1,13 @@
 import { getCurrentUser } from "@/lib/appwrites";
+import { UserProp } from "@/types/user";
 import React from "react";
 
 type StateProps = {
   isLoading: boolean;
   isLoggedIn: boolean;
-  user: null | {};
+  user: null | UserProp;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-  setUser: React.Dispatch<React.SetStateAction<null | {}>>;
+  setUser: React.Dispatch<React.SetStateAction<null | UserProp>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
@@ -26,7 +27,7 @@ export const useGlobalContext = () => React.useContext(GlobalContext);
 
 const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false);
-  const [user, setUser] = React.useState<null | {}>(null);
+  const [user, setUser] = React.useState<null | UserProp>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   const getUser = async () => {
