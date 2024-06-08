@@ -9,14 +9,24 @@ type Props = {
   video: Models.Document;
   showMoreId: string | null;
   onShowMore: (id: string) => void;
+  activeVideoId: string | null;
 };
 
-const VideoCard = ({ video, onShowMore, showMoreId }: Props) => {
+const VideoCard = ({ video, onShowMore, showMoreId, activeVideoId }: Props) => {
+  // HOOKS
   const [isPlaying, setIsPlaying] = React.useState(false);
 
+  // FUNCTIONS
   const handleBookmark = async () => {};
 
-  const handleDelete = async () => {};
+  const handleDelete = async () => {};  
+
+  // USE EFFECTS
+  React.useEffect(() => {
+    if (activeVideoId !== video?.$id) {
+      setIsPlaying(false);
+    }
+  }, [activeVideoId, video]);
 
   return (
     <View className="flex-col items-center px-4 mb-12">

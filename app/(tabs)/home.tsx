@@ -1,4 +1,11 @@
-import { FlatList, Image, RefreshControl, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  RefreshControl,
+  Text,
+  View,
+  ViewToken,
+} from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "@/constants";
@@ -9,6 +16,7 @@ import useAppWrite from "@/lib/useAppWrite";
 import VideoCard from "@/components/VideoCard";
 import Latest from "@/components/Latest";
 import { useGlobalContext } from "@/context/GlobalProvider.Context";
+import TitleHeader from "@/components/TitleHeader";
 
 const Home = () => {
   // HOOKS
@@ -17,6 +25,7 @@ const Home = () => {
   const [refreshing, setRefreshing] = React.useState(false);
   const { user } = useGlobalContext();
   const [showMore, setShowMore] = React.useState<string | null>(null);
+  const [active, setActive] = React.useState<string | null>(null);
 
   const handleShowMore = (id: string) => {
     setShowMore((prevId) => (prevId === id ? null : id));
@@ -28,24 +37,34 @@ const Home = () => {
     setRefreshing(false);
   };
 
+  const viewableItemsChanged = ({
+    viewableItems,
+  }: {
+    viewableItems: ViewToken[];
+  }) => {
+    if (viewableItems.length > 0) {
+      setActive(viewableItems[0].key);
+    }
+  };
+
   return (
     <SafeAreaView className="w-full h-full bg-primary">
       <FlatList
         data={posts}
         keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => <VideoCard video={item} showMoreId={showMore}
-        onShowMore={handleShowMore} />}
+        renderItem={({ item }) => (
+          <VideoCard
+            video={item}
+            showMoreId={showMore}
+            onShowMore={handleShowMore}
+            activeVideoId={active}
+          />
+        )}
         ListHeaderComponent={() => (
           <View className="px-6 my-6 space-y-6">
             <View className="flex-row items-start justify-between mb-6">
-              <View>
-                <Text className="text-sm text-gray-100 font-pmedium">
-                  Welcome Back
-                </Text>
-                <Text className="text-2xl text-white font-psemibold">
-                  {user?.username}
-                </Text>
-              </View>
+              <TitleHeader subTitle="Welcome Back" title={user?.username} />
+
               <View className="mt-1.5">
                 <Image
                   source={images.logoSmall}
@@ -81,6 +100,8 @@ const Home = () => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        viewabilityConfig={{ itemVisiblePercentThreshold: 70 }}
+        onViewableItemsChanged={viewableItemsChanged}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>

@@ -57,7 +57,16 @@ export const createUser = async ({ username, email, password }: AuthProps) => {
       }
     );
 
-    return newUser;
+    if (!newUser) throw Error;
+
+    const {
+      email: mail,
+      username: name,
+      avatar,
+      accountId,
+    } = newUser.documents[0];
+
+    return { email: mail, username: name, avatar, accountId };
   } catch (err: any) {
     throw new Error(err);
   }
@@ -67,7 +76,6 @@ export const createUser = async ({ username, email, password }: AuthProps) => {
 export const signIn = async ({ email, password }: AuthProps) => {
   try {
     const session = await account.createEmailPasswordSession(email, password);
-
     return session;
   } catch (err: any) {
     throw new Error(err);
@@ -118,6 +126,24 @@ export const getLatestPosts = async () => {
       config.videosCollectionId,
       [Query.orderDesc("$createdAt"), Query.limit(7)]
     );
+    return post.documents;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+// Get users posts
+export const getUsersPosts = async () => {
+  try {
+    const currentUser = await account.get();
+
+    if (!currentUser) throw Error;
+
+    const post = await databases.listDocuments(
+      config.databaseId,
+      config.videosCollectionId
+    );
+    [Query.equal("creator.accountId", currentUser.$id)];
     return post.documents;
   } catch (err: any) {
     throw new Error(err);
