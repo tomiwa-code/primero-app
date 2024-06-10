@@ -64,9 +64,16 @@ export const createUser = async ({ username, email, password }: AuthProps) => {
       username: name,
       avatar,
       accountId,
+      $id,
     } = newUser.documents[0];
 
-    return { email: mail, username: name, avatar, accountId };
+    return {
+      email: mail,
+      username: name,
+      avatar,
+      accountId,
+      id: $id,
+    };
   } catch (err: any) {
     throw new Error(err);
   }
@@ -97,9 +104,10 @@ export const getCurrentUser = async () => {
 
     if (!currentUser) throw Error;
 
-    const { email, username, avatar, accountId } = currentUser.documents[0];
+    const { email, username, avatar, accountId, $id } =
+      currentUser.documents[0];
 
-    return { email, username, avatar, accountId };
+    return { email, username, avatar, accountId, id: $id };
   } catch (err: any) {
     throw new Error(err);
   }
@@ -132,7 +140,7 @@ export const getLatestPosts = async () => {
   }
 };
 
-// Get users posts
+// Get user's posts
 export const getUsersPosts = async () => {
   try {
     const currentUser = await account.get();
@@ -145,6 +153,89 @@ export const getUsersPosts = async () => {
     );
     [Query.equal("creator.accountId", currentUser.$id)];
     return post.documents;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+// Get user bookmarked posts
+export const getUsersBookmarkedPosts = async () => {
+  try {
+    const currentUser = await account.get();
+
+    if (!currentUser) throw Error;
+
+    const post = await databases.listDocuments(
+      config.databaseId,
+      config.videosCollectionId
+    );
+
+    const filteredPosts = post.documents.filter((post) =>
+      post.bookmark.some(
+        (bookmark: any) => bookmark?.accountId === currentUser.$id
+      )
+    );
+
+    return filteredPosts;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+// Bookmark a post
+export const bookmarkPost = async (videoId: string, userId: string) => {
+  try {
+    if (!videoId || !userId) throw Error;
+
+    const getVideo = await databases.getDocument(
+      config.databaseId,
+      config.videosCollectionId,
+      videoId
+    );
+
+    const updateBookmark = [...getVideo?.bookmark, userId];
+    const updateVideo = await databases.updateDocument(
+      config.databaseId,
+      config.videosCollectionId,
+      videoId,
+      { bookmark: updateBookmark }
+    );
+
+    if (updateVideo?.bookmark?.length > 0) {
+      return { success: true, msg: "Video added to bookmark" };
+    }
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+// Un-bookmark a post
+export const removeBookmarkedPost = async (videoId: string, userId: string) => {
+  try {
+    if (!videoId || !userId) throw Error;
+
+    const getVideo = await databases.getDocument(
+      config.databaseId,
+      config.videosCollectionId,
+      videoId
+    );
+
+    const updateBookmark = getVideo?.bookmark?.filter(
+      (item: any) => item?.$id !== userId
+    );
+
+    const updateVideo = await databases.updateDocument(
+      config.databaseId,
+      config.videosCollectionId,
+      videoId,
+      { bookmark: updateBookmark }
+    );
+
+    return {
+      success: true,
+      msg: "Video removed from bookmark",
+      data: updateVideo,
+    };
   } catch (err: any) {
     throw new Error(err);
   }

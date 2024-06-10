@@ -1,16 +1,89 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { FlatList, RefreshControl, View, ViewToken } from "react-native";
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import TitleHeader from "@/components/TitleHeader";
+import SearchInput from "@/components/SearchInput";
+import EmptyState from "@/components/EmptyState";
+import VideoCard from "@/components/VideoCard";
+import useAppWrite from "@/lib/useAppWrite";
+import { getUsersBookmarkedPosts } from "@/lib/appwrites";
+import { useGlobalContext } from "@/context/GlobalProvider.Context";
 
-type Props = {}
+const Bookmark = () => {
+  // HOOKS
+  const { data: posts, mutate } = useAppWrite(getUsersBookmarkedPosts);
+  const [showMoreId, setShowMoreId] = React.useState<string | null>(null);
+  const [active, setActive] = React.useState<string | null>(null);
+  const [refreshing, setRefreshing] = React.useState<boolean>(false);
+  const { user } = useGlobalContext();
 
-const Bookmark = (props: Props) => {
+  // FUNCTIONS
+  const handleShowMore = (id: string) => {
+    setShowMoreId((prevId) => (prevId === id ? null : id));
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    mutate();
+    setRefreshing(false);
+  };
+
+  const viewableItemsChanged = ({
+    viewableItems,
+  }: {
+    viewableItems: ViewToken[];
+  }) => {
+    if (viewableItems.length !== 0) {
+      setActive(viewableItems[0].key);
+    }
+  };
+
   return (
-    <View>
-      <Text>Bookmark</Text>
-    </View>
-  )
-}
+    <SafeAreaView className="w-full h-full bg-primary">
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item.$id}
+        renderItem={({ item }) => (
+          <VideoCard
+            video={item}
+            onShowMore={handleShowMore}
+            showMoreId={showMoreId}
+            activeVideoId={active}
+            mutate={mutate}
+            user={user}
+          />
+        )}
+        ListHeaderComponent={() => (
+          <View className="py-6 w-full px-5 mb-4">
+            <TitleHeader subTitle="Your Saved Videos" title="Saved Videos" />
 
-export default Bookmark
+            <View className="mt-6">
+              <SearchInput
+                placeholder="Search your saved videos"
+                handleChangeText={() => {}}
+                handleSearch={() => {}}
+                keyboardType="web-search"
+              />
+            </View>
+          </View>
+        )}
+        ListEmptyComponent={() => (
+          <EmptyState
+            subtitle="No video has been bookmarked"
+            title="Bookmark empty"
+            btnText="Explore videos"
+            redirect="/home"
+          />
+        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+        viewabilityConfig={{ itemVisiblePercentThreshold: 70 }}
+        onViewableItemsChanged={viewableItemsChanged}
+        showsVerticalScrollIndicator={false}
+      />
+    </SafeAreaView>
+  );
+};
 
-const styles = StyleSheet.create({})
+export default Bookmark;

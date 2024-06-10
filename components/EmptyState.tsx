@@ -7,9 +7,16 @@ import { images } from "@/constants";
 interface EmptyStateProps {
   title: string;
   subtitle: string;
+  btnText: string;
+  redirect: string;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ title, subtitle }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({
+  title,
+  subtitle,
+  btnText,
+  redirect,
+}) => {
   return (
     <View className="items-center justify-center px-6">
       <Image
@@ -26,9 +33,9 @@ const EmptyState: React.FC<EmptyStateProps> = ({ title, subtitle }) => {
       </Text>
 
       <CustomButtons
-        handlePress={() => router.push("/create")}
+        handlePress={() => router.push(redirect)}
         containerStyles="w-full my-5"
-        title="Create video"
+        title={btnText}
       />
     </View>
   );

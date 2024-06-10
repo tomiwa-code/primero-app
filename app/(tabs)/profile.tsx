@@ -58,6 +58,8 @@ const Profile = () => {
             onShowMore={handleShowMore}
             showMoreId={showMoreId}
             activeVideoId={active}
+            mutate={mutate}
+            user={user}
           />
         )}
         ListHeaderComponent={() => (
@@ -109,7 +111,12 @@ const Profile = () => {
           </View>
         )}
         ListEmptyComponent={() => (
-          <EmptyState title="No videos found" subtitle="Create a video" />
+          <EmptyState
+            title="No videos found found for this profile"
+            subtitle="No video found"
+            btnText="Explore videos"
+            redirect="/home"
+          />
         )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleOnRefresh} />

@@ -58,6 +58,8 @@ const Home = () => {
             showMoreId={showMore}
             onShowMore={handleShowMore}
             activeVideoId={active}
+            mutate={mutate}
+            user={user}
           />
         )}
         ListHeaderComponent={() => (
@@ -94,7 +96,9 @@ const Home = () => {
         ListEmptyComponent={() => (
           <EmptyState
             title="No videos found"
-            subtitle="Be the first to upload an image"
+            subtitle="Be the first to upload a video"
+            btnText="Create a video"
+            redirect="/create"
           />
         )}
         refreshControl={

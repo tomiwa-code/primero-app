@@ -3,4 +3,5 @@ export type UserProp = {
   email: string;
   accountId: string;
   avatar: string;
+  id: string
 };

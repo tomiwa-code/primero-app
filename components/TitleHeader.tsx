@@ -10,7 +10,7 @@ const TitleHeader = ({ subTitle, title }: Props) => {
   return (
     <View>
       <Text className="text-sm text-gray-100 font-pmedium">{subTitle}</Text>
-      <Text className="text-2xl text-white font-psemibold">{title}</Text>
+      <Text className="text-2xl text-white font-psemibold mt-0.5">{title}</Text>
     </View>
   );
 };
