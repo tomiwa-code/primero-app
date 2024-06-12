@@ -78,9 +78,6 @@ const Home = () => {
 
             <SearchInput
               placeholder="Search for a video topic"
-              handleSearch={() => {}}
-              handleChangeText={() => {}}
-              value=""
               keyboardType="web-search"
             />
 

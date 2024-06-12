@@ -133,9 +133,7 @@ export const getLatestPosts = async () => {
 };
 
 // Get user's profile
-export const getUserProfile = async (
-  userId: string | string[] | undefined
-) => {
+export const getUserProfile = async (userId: string | string[] | undefined) => {
   try {
     if (!userId) throw Error;
 
@@ -152,9 +150,7 @@ export const getUserProfile = async (
 };
 
 // Get user's posts
-export const getUsersPosts = async (
-  userId: string | string[] | undefined
-) => {
+export const getUsersPosts = async (userId: string | string[] | undefined) => {
   try {
     if (!userId) {
       throw new Error("user ID is required");
@@ -169,6 +165,25 @@ export const getUsersPosts = async (
     return post.documents;
   } catch (err: any) {
     throw new Error("error", err);
+  }
+};
+
+// Search for posts
+export const searchPosts = async (query: string | string[] | undefined) => {
+  if (typeof query !== "string") {
+    throw new Error("Search input is invalid")
+  }
+
+  try {
+    const posts = await databases.listDocuments(
+      config.databaseId,
+      config.videosCollectionId,
+      [Query.search("tittle", query)]
+    );
+
+    return posts.documents;
+  } catch (err: any) {
+    throw new Error(err);
   }
 };
 

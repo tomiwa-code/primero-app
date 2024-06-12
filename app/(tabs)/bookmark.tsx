@@ -54,14 +54,12 @@ const Bookmark = () => {
           />
         )}
         ListHeaderComponent={() => (
-          <View className="py-6 w-full px-5 mb-4">
+          <View className="w-full px-5 py-6 mb-4">
             <TitleHeader subTitle="Your Saved Videos" title="Saved Videos" />
 
             <View className="mt-6">
               <SearchInput
-                placeholder="Search your saved videos"
-                handleChangeText={() => {}}
-                handleSearch={() => {}}
+                placeholder="Search for videos topic"
                 keyboardType="web-search"
               />
             </View>
