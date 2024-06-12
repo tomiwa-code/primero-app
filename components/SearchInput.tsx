@@ -29,7 +29,7 @@ const SearchInput = ({
     <View className="relative flex-row items-center w-full h-16 px-4 border-2 border-black-200 bg-black-100 rounded-2xl focus:border-secondary">
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor={"#7b7b8b"}
+        placeholderTextColor={"#CDCDE0"}
         value={value}
         keyboardType={keyboardType}
         className={"flex-1 text-white font-psemibold text-base"}

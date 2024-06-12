@@ -22,7 +22,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <Image
         source={images.empty}
         resizeMode="contain"
-        className="w-[250px] h-[170px]"
+        className="w-[250px] h-[150px]"
       />
 
       <Text className="text-xl text-center text-white font-psemibold">

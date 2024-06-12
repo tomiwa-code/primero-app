@@ -6,9 +6,8 @@ import CustomButtons from "@/components/CustomButtons";
 import FormField from "@/components/FormField";
 import { Link, router } from "expo-router";
 import { AuthProps } from "@/types/auth";
-import { signIn } from "@/lib/appwrites";
+import { getCurrentUser, signIn } from "@/lib/appwrites";
 import { useGlobalContext } from "@/context/GlobalProvider.Context";
-
 
 const SignIn = () => {
   const [form, setForm] = React.useState<AuthProps>({
@@ -30,10 +29,11 @@ const SignIn = () => {
 
     try {
       const result = await signIn({ email, password });
-      setUser(result);
-      setIsLoggedIn(true);
-
-      Alert.alert("success", "You have successfully signed in")
+      if (result) {
+        const userData = await getCurrentUser();
+        setUser(userData);
+        setIsLoggedIn(true);
+      }
       router.replace("/home");
     } catch (err: any) {
       Alert.alert("Error", err?.message);

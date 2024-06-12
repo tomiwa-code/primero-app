@@ -59,20 +59,12 @@ export const createUser = async ({ username, email, password }: AuthProps) => {
 
     if (!newUser) throw Error;
 
-    const {
-      email: mail,
-      username: name,
-      avatar,
-      accountId,
-      $id,
-    } = newUser.documents[0];
-
     return {
-      email: mail,
-      username: name,
-      avatar,
-      accountId,
-      id: $id,
+      email: newUser?.mail,
+      username: newUser?.name,
+      avatar: newUser?.avatar,
+      accountId: newUser?.accountId,
+      id: newUser?.$id,
     };
   } catch (err: any) {
     throw new Error(err);
@@ -140,21 +132,43 @@ export const getLatestPosts = async () => {
   }
 };
 
-// Get user's posts
-export const getUsersPosts = async () => {
+// Get user's profile
+export const getUserProfile = async (
+  userId: string | string[] | undefined
+) => {
   try {
-    const currentUser = await account.get();
+    if (!userId) throw Error;
 
-    if (!currentUser) throw Error;
+    const user = await databases.listDocuments(
+      config.databaseId,
+      config.usersCollectionId,
+      [Query.equal("$id", userId)]
+    );
+
+    return user.documents;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+// Get user's posts
+export const getUsersPosts = async (
+  userId: string | string[] | undefined
+) => {
+  try {
+    if (!userId) {
+      throw new Error("user ID is required");
+    }
 
     const post = await databases.listDocuments(
       config.databaseId,
-      config.videosCollectionId
+      config.videosCollectionId,
+      [Query.equal("creator", userId)]
     );
-    [Query.equal("creator.accountId", currentUser.$id)];
+
     return post.documents;
   } catch (err: any) {
-    throw new Error(err);
+    throw new Error("error", err);
   }
 };
 
@@ -236,6 +250,16 @@ export const removeBookmarkedPost = async (videoId: string, userId: string) => {
       msg: "Video removed from bookmark",
       data: updateVideo,
     };
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+// Sign user out
+export const signUserOut = async () => {
+  try {
+    const session = await account.deleteSession("current");
+    return session;
   } catch (err: any) {
     throw new Error(err);
   }
