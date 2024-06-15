@@ -4,7 +4,11 @@ import { Models } from "react-native-appwrite";
 import { icons } from "@/constants";
 import { textTrunc } from "@/lib/fn";
 import { Video, ResizeMode, AVPlaybackStatus } from "expo-av";
-import { bookmarkPost, removeBookmarkedPost } from "@/lib/appwrites";
+import {
+  DeletePost,
+  bookmarkPost,
+  removeBookmarkedPost,
+} from "@/lib/appwrites";
 import { UserProp } from "@/types/user";
 import { Link } from "expo-router";
 
@@ -37,6 +41,7 @@ const VideoCard = ({
     }
     return false;
   }, [video]);
+  const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
 
   // FUNCTIONS
   const handleBookmark = async (action: "save" | "unsaved") => {
@@ -80,7 +85,18 @@ const VideoCard = ({
     }
   };
 
-  const handleDelete = async () => {};
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await DeletePost(video?.$id);
+      mutate();
+      Alert.alert("Post Deleted", "Post has been deleted successfully");
+    } catch (err: any) {
+      Alert.alert("Error", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // USE EFFECTS
   React.useEffect(() => {
@@ -156,7 +172,7 @@ const VideoCard = ({
                       resizeMode="contain"
                     />
                     <Text className="text-base text-gray-100 capitalize">
-                      Delete
+                      {isDeleting ? " Deleting" : "Delete"}
                     </Text>
                   </TouchableOpacity>
                 </View>

@@ -1,11 +1,14 @@
 import { AuthProps } from "@/types/auth";
+import { FileProp, FormType } from "@/types/file";
 import {
   Account,
   Avatars,
   Client,
   Databases,
   ID,
+  ImageGravity,
   Query,
+  Storage,
 } from "react-native-appwrite";
 
 export const config = {
@@ -28,6 +31,7 @@ client
 const account = new Account(client);
 const avatars = new Avatars(client);
 const databases = new Databases(client);
+const storage = new Storage(client);
 
 // Create User
 export const createUser = async ({ username, email, password }: AuthProps) => {
@@ -81,6 +85,16 @@ export const signIn = async ({ email, password }: AuthProps) => {
   }
 };
 
+// Sign user out
+export const signUserOut = async () => {
+  try {
+    const session = await account.deleteSession("current");
+    return session;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
 // get current user
 export const getCurrentUser = async () => {
   try {
@@ -110,8 +124,10 @@ export const getAllPosts = async () => {
   try {
     const post = await databases.listDocuments(
       config.databaseId,
-      config.videosCollectionId
+      config.videosCollectionId,
+      [Query.orderDesc("$createdAt")]
     );
+
     return post.documents;
   } catch (err: any) {
     throw new Error(err);
@@ -159,7 +175,7 @@ export const getUsersPosts = async (userId: string | string[] | undefined) => {
     const post = await databases.listDocuments(
       config.databaseId,
       config.videosCollectionId,
-      [Query.equal("creator", userId)]
+      [Query.equal("creator", userId), Query.orderDesc("$createdAt")]
     );
 
     return post.documents;
@@ -171,7 +187,7 @@ export const getUsersPosts = async (userId: string | string[] | undefined) => {
 // Search for posts
 export const searchPosts = async (query: string | string[] | undefined) => {
   if (typeof query !== "string") {
-    throw new Error("Search input is invalid")
+    throw new Error("Search input is invalid");
   }
 
   try {
@@ -188,21 +204,17 @@ export const searchPosts = async (query: string | string[] | undefined) => {
 };
 
 // Get user bookmarked posts
-export const getUsersBookmarkedPosts = async () => {
+export const getUsersBookmarkedPosts = async (userId: string | undefined) => {
+  if (!userId) throw Error("Could not verify user");
+
   try {
-    const currentUser = await account.get();
-
-    if (!currentUser) throw Error;
-
     const post = await databases.listDocuments(
       config.databaseId,
       config.videosCollectionId
     );
 
     const filteredPosts = post.documents.filter((post) =>
-      post.bookmark.some(
-        (bookmark: any) => bookmark?.accountId === currentUser.$id
-      )
+      post.bookmark.some((bookmark: any) => bookmark?.$id === userId)
     );
 
     return filteredPosts;
@@ -270,12 +282,101 @@ export const removeBookmarkedPost = async (videoId: string, userId: string) => {
   }
 };
 
-// Sign user out
-export const signUserOut = async () => {
+// Get file Preview
+export const getFilePreview = async (
+  fileID: string,
+  FileType: "images" | "videos"
+) => {
+  let fileUrl;
   try {
-    const session = await account.deleteSession("current");
-    return session;
+    if (FileType === "videos") {
+      fileUrl = storage.getFileView(config.storageId, fileID);
+    } else {
+      fileUrl = storage.getFilePreview(
+        config.storageId,
+        fileID,
+        2000,
+        2000,
+        ImageGravity.Top,
+        100
+      );
+    }
+
+    if (!fileUrl) throw Error;
+
+    return fileUrl;
   } catch (err: any) {
     throw new Error(err);
+  }
+};
+
+// Upload file to storage
+export const uploadFileToStorage = async (
+  file: FileProp,
+  fileType: "images" | "videos"
+) => {
+  if (!file) throw Error("File is required");
+
+  if (!fileType) throw Error("File type is required");
+
+  try {
+    const uploadFile = await storage.createFile(
+      config.storageId,
+      ID.unique(),
+      file
+    );
+
+    const fileUrl = await getFilePreview(uploadFile.$id, fileType);
+
+    return fileUrl;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
+// Create Video/Post
+export const CreatePost = async (
+  file: FormType,
+  userId: string | undefined
+) => {
+  try {
+    const [thumbnail, video] = await Promise.all([
+      uploadFileToStorage(file.thumbnail, "images"),
+      uploadFileToStorage(file.video, "videos"),
+    ]);
+
+    const createVideo = await databases.createDocument(
+      config.databaseId,
+      config.videosCollectionId,
+      ID.unique(),
+      {
+        tittle: file.title,
+        prompt: file.prompt,
+        thumbnail,
+        video,
+        creator: userId,
+      }
+    );
+
+    return createVideo;
+  } catch (err: any) {
+    throw new Error("Failed to create post: " + err.message);
+  }
+};
+
+// Delete Post
+export const DeletePost = async (videoId: string) => {
+  try {
+    const result = await databases.deleteDocument(
+      config.databaseId,
+      config.videosCollectionId,
+      videoId
+    );
+
+    return result;
+  } catch (err: any) {
+    throw new Error(
+      "Post could not be deleted: " + err || "Something went wrong"
+    );
   }
 };

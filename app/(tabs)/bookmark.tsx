@@ -11,11 +11,11 @@ import { useGlobalContext } from "@/context/GlobalProvider.Context";
 
 const Bookmark = () => {
   // HOOKS
-  const { data: posts, mutate } = useAppWrite(getUsersBookmarkedPosts);
+  const { user } = useGlobalContext();
+  const { data: posts, mutate } = useAppWrite(() => getUsersBookmarkedPosts(user?.id));
   const [showMoreId, setShowMoreId] = React.useState<string | null>(null);
   const [active, setActive] = React.useState<string | null>(null);
   const [refreshing, setRefreshing] = React.useState<boolean>(false);
-  const { user } = useGlobalContext();
 
   // FUNCTIONS
   const handleShowMore = (id: string) => {

@@ -13,18 +13,17 @@ import { getUserProfile, getUsersPosts } from "@/lib/appwrites";
 import VideoCard from "@/components/VideoCard";
 import EmptyState from "@/components/EmptyState";
 import { useLocalSearchParams } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider.Context";
 
 const OtherUserProfile = () => {
   // HOOKS
   const { userId } = useLocalSearchParams();
+  const { user } = useGlobalContext();
   const { data: userData } = useAppWrite(() => getUserProfile(userId));
-  const user = userData[0]
-  const { data: posts, mutate } = useAppWrite(() =>
-    getUsersPosts(userId)
-  );
+  const { data: posts, mutate } = useAppWrite(() => getUsersPosts(userId));
   const [showMoreId, setShowMoreId] = React.useState<string | null>(null);
   const [refreshing, setRefreshing] = React.useState<boolean>(false);
-  const [active, setActive] = React.useState<string | null>(null);  
+  const [active, setActive] = React.useState<string | null>(null);
 
   // FUNCTIONS
   const handleShowMore = (id: string) => {
@@ -68,13 +67,13 @@ const OtherUserProfile = () => {
               <View className="flex-col items-center justify-center gap-y-4">
                 <View className="border-secondary border rounded-lg p-0.5 w-[60px] h-[60px]">
                   <Image
-                    source={{ uri: user?.avatar }}
+                    source={{ uri: userData[0]?.avatar }}
                     resizeMode="contain"
                     className="w-full h-full rounded-lg"
                   />
                 </View>
                 <Text className="text-xl text-center text-white font-psemibold">
-                  {user?.username}
+                  {userData[0]?.username}
                 </Text>
               </View>
             </View>

@@ -20,7 +20,7 @@ import { useRouter } from "expo-router";
 const Profile = () => {
   // HOOKS
   const { user } = useGlobalContext();
-  const { data: posts, mutate } = useAppWrite(() => getUsersPosts(user?.accountId));
+  const { data: posts, mutate } = useAppWrite(() => getUsersPosts(user?.id));
   const [showMoreId, setShowMoreId] = React.useState<string | null>(null);
   const [refreshing, setRefreshing] = React.useState<boolean>(false);
   const [active, setActive] = React.useState<string | null>(null);
